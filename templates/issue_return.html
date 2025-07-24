@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Issue/Return Books</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h2::before {
+            content: "📚";
+            font-size: 1.5rem;
+        }
+
+        .management-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group select.valid,
+        .form-group input.valid {
+            border-color: #27ae60;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .history-section h3 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .history-section h3::before {
+            content: "📋";
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .transaction-count {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .transaction-list {
+            list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            background: linear-gradient(90deg, #f8f9fa, #ffffff);
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .transaction-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-item.issue {
+            border-left-color: #27ae60;
+        }
+
+        .transaction-item.return {
+            border-left-color: #e74c3c;
+        }
+
+        .transaction-date {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .transaction-details {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .action-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin: 0 5px;
+        }
+
+        .action-badge.issue {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+        }
+
+        .action-badge.return {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.issue {
+            background: #27ae60;
+        }
+
+        .status-indicator.return {
+            background: #e74c3c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state::before {
+            content: "📚";
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(90deg, #f8f9fa, #ffffff);
+            border-radius: 10px;
+            border: 1px solid #e0e6ed;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .members-list, .books-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .member-item, .book-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+            font-size: 0.9rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .management-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> Rayol Library</h1>
+            <p>Issue and Return Books with Ease</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-message" id="successMessage">
+                Transaction completed successfully! 🎉
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                Error: Unable to process transaction.
+            </div>
+
+            <div class="form-section">
+                <h2>Rayol Library</h2>
+                
+                <div class="management-tabs">
+                    <button class="tab-btn active" onclick="switchTab('transaction')">📚 Issue/Return Books</button>
+                    <button class="tab-btn" onclick="switchTab('addMember')">👥 Add Member</button>
+                    <button class="tab-btn" onclick="switchTab('addBook')">📖 Add Book</button>
+                </div>
+
+                <!-- Transaction Tab -->
+                <div id="transactionTab" class="tab-content active">
+                    <form id="transactionForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="member_id">Select Member</label>
+                                <select name="member_id" id="member_id" required>
+                                    <option value="">Choose a member...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="book_id">Select Book</label>
+                                <select name="book_id" id="book_id" required>
+                                    <option value="">Choose a book...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="action">Action</label>
+                                <select name="action" id="action" required>
+                                    <option value="">Select action...</option>
+                                    <option value="issue">📤 Issue Book</option>
+                                    <option value="return">📥 Return Book</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="date">Transaction Date</label>
+                                <input type="date" name="date" id="date" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            Process Transaction
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Add Member Tab -->
+                <div id="addMemberTab" class="tab-content">
+                    <form id="memberForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="memberName">Member Name</label>
+                                <input type="text" id="memberName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="memberEmail">Email</label>
+                                <input type="email" id="memberEmail" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Member</button>
+                    </form>
+                    
+                    <h3 style="margin-top: 30px; color: #2c3e50;">Current Members</h3>
+                    <div class="members-list" id="membersList"></div>
+                </div>
+
+                <!-- Add Book Tab -->
+                <div id="addBookTab" class="tab-content">
+                    <form id="bookForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="bookTitle">Book Title</label>
+                                <input type="text" id="bookTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookAuthor">Author</label>
+                                <input type="text" id="bookAuthor" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Book</button>
+                    </form>
+                    
+                    <h3 style="margin-top: 30px; color: #2c3e50;">Current Books</h3>
+                    <div class="books-list" id="booksList"></div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h3>
+                    Transaction History
+                    <span class="transaction-count" id="transactionCount">0 Transactions</span>
+                </h3>
+                
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalIssued">0</span>
+                        <span class="stat-label">Books Issued</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalReturned">0</span>
+                        <span class="stat-label">Books Returned</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="currentlyIssued">0</span>
+                        <span class="stat-label">Currently Issued</span>
+                    </div>
+                </div>
+                
+                <ul class="transaction-list" id="transactionList">
+                    <div class="empty-state">
+                        <h4>No transactions yet</h4>
+                        <p>Start by issuing or returning books using the form above!</p>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize with some default data
+        let members = [
+            { id: 1, name: 'John Doe', email: 'john.doe@email.com' },
+            { id: 2, name: 'Jane Smith', email: 'jane.smith@email.com' }
+        ];
+
+        let books = [
+            { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', available: true, issuedTo: null },
+            { id: 2, title: 'To Kill a Mockingbird', author: 'Harper Lee', available: true, issuedTo: null },
+            { id: 3, title: '1984', author: 'George Orwell', available: true, issuedTo: null }
+        ];
+
+        let transactions = [];
+        let nextMemberId = 3;
+        let nextBookId = 4;
+        let nextTransactionId = 1;
+
+        // DOM elements
+        const memberSelect = document.getElementById('member_id');
+        const bookSelect = document.getElementById('book_id');
+        const actionSelect = document.getElementById('action');
+        const dateInput = document.getElementById('date');
+        const submitBtn = document.getElementById('submitBtn');
+        const transactionForm = document.getElementById('transactionForm');
+        const memberForm = document.getElementById('memberForm');
+        const bookForm = document.getElementById('bookForm');
+        const transactionList = document.getElementById('transactionList');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to selected tab and button
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update displays
+            if (tabName === 'addMember') {
+                displayMembers();
+            } else if (tabName === 'addBook') {
+                displayBooks();
+            }
+        }
+
+        // Initialize the application
+        function initializeApp() {
+            populateMembers();
+            populateBooks();
+            setTodayAsDefault();
+            setMinDate();
+            renderTransactions();
+            updateStats();
+            displayMembers();
+            displayBooks();
+        }
+
+        // Add new member
+        memberForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('memberName').value;
+            const email = document.getElementById('memberEmail').value;
+            
+            if (name && email) {
+                members.push({
+                    id: nextMemberId++,
+                    name: name,
+                    email: email
+                });
+                
+                showSuccessMessage(`Member "${name}" added successfully!`);
+                memberForm.reset();
+                populateMembers();
+                displayMembers();
+            }
+        });
+
+        // Add new book
+        bookForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('bookTitle').value;
+            const author = document.getElementById('bookAuthor').value;
+            
+            if (title && author) {
+                books.push({
+                    id: nextBookId++,
+                    title: title,
+                    author: author,
+                    available: true,
+                    issuedTo: null
+                });
+                
+                showSuccessMessage(`Book "${title}" added successfully!`);
+                bookForm.reset();
+                populateBooks();
+                displayBooks();
+            }
+        });
+
+        // Display members list
+        function displayMembers() {
+            const membersList = document.getElementById('membersList');
+            if (members.length === 0) {
+                membersList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No members added yet</p>';
+            } else {
+                membersList.innerHTML = members.map(member => 
+                    `<div class="member-item">
+                        <strong>${member.name}</strong> - ${member.email}
+                    </div>`
+                ).join('');
+            }
+        }
+
+        // Display books list
+        function displayBooks() {
+            const booksList = document.getElementById('booksList');
+            if (books.length === 0) {
+                booksList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No books added yet</p>';
+            } else {
+                booksList.innerHTML = books.map(book => 
+                    `<div class="book-item">
+                        <strong>${book.title}</strong> by ${book.author} 
+                        <span style="color: ${book.available ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
+                            ${book.available ? '(Available)' : '(Issued)'}
+                        </span>
+                    </div>`
+                ).join('');
+            }
+        }
+
+        // Populate member dropdown
+        function populateMembers() {
+            memberSelect.innerHTML = '<option value="">Choose a member...</option>';
+            members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.name;
+                memberSelect.appendChild(option);
+            });
+        }
+
+        // Populate book dropdown based on action
+        function populateBooks() {
+            const action = actionSelect.value;
+            const selectedMemberId = parseInt(memberSelect.value);
+            
+            bookSelect.innerHTML = '<option value="">Choose a book...</option>';
+            
+            let availableBooks = books;
+            
+            if (action === 'issue') {
+                // Only show available books for issuing
+                availableBooks = books.filter(book => book.available);
+            } else if (action === 'return') {
+                // Only show books issued to the selected member
+                if (selectedMemberId) {
+                    availableBooks = books.filter(book => !book.available && book.issuedTo === selectedMemberId);
+                } else {
+                    availableBooks = books.filter(book => !book.available);
+                }
+            }
+            
+            availableBooks.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = `${book.title} by ${book.author}`;
+                if (!book.available) {
+                    const issuedMember = members.find(m => m.id === book.issuedTo);
+                    if (issuedMember) {
+                        option.textContent += ` (Issued to ${issuedMember.name})`;
+                    }
+                }
+                bookSelect.appendChild(option);
+            });
+
+            updateSubmitButton();
+        }
+
+        // Set today as default date
+        function setTodayAsDefault() {
+            const today = new Date();
+            dateInput.valueAsDate = today;
+        }
+
+        // Set minimum date
+        function setMinDate() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            dateInput.min = yesterday.toISOString().split('T')[0];
+        }
+
+        // Update submit button based on action
+        function updateSubmitButton() {
+            const action = actionSelect.value;
+            if (action === 'issue') {
+                submitBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                submitBtn.textContent = '📤 Issue Book';
+            } else if (action === 'return') {
+                submitBtn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                submitBtn.textContent = '📥 Return Book';
+            } else {
+                submitBtn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                submitBtn.textContent = 'Process Transaction';
+            }
+        }
+
+        // Create transaction item HTML
+        function createTransactionHTML(transaction) {
+            const member = members.find(m => m.id === transaction.memberId);
+            const book = books.find(b => b.id === transaction.bookId);
+            
+            if (!member || !book) return '';
+            
+            return `
+                <li class="transaction-item ${transaction.action}">
+                    <div class="transaction-date">${formatDate(transaction.date)}</div>
+                    <div class="transaction-details">
+                        <span class="status-indicator ${transaction.action}"></span>
+                        <strong>${member.name}</strong>
+                        <span class="action-badge ${transaction.action}">${transaction.action}d</span>
+                        <em>${book.title}</em>
+                        ${transaction.fine ? `<span class="fine-amount">Fine: ₹${transaction.fine}</span>` : ''}
+                    </div>
+                </li>
+            `;
+        }
+
+        // Render all transactions
+        function renderTransactions() {
+            if (transactions.length === 0) {
+                transactionList.innerHTML = `
+                    <div class="empty-state">
+                        <h4>No transactions yet</h4>
+                        <p>Start by issuing or returning books using the form above!</p>
+                    </div>
+                `;
+            } else {
+                const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+                const transactionHTML = sortedTransactions.map(createTransactionHTML).filter(html => html !== '').join('');
+                transactionList.innerHTML = transactionHTML;
+            }
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const issued = transactions.filter(t => t.action === 'issue').length;
+            const returned = transactions.filter(t => t.action === 'return').length;
+            const currentlyIssued = books.filter(b => !b.available).length;
+            const totalTransactions = transactions.length;
+
+            document.getElementById('totalIssued').textContent = issued;
+            document.getElementById('totalReturned').textContent = returned;
+            document.getElementById('currentlyIssued').textContent = currentlyIssued;
+            document.getElementById('transactionCount').textContent = `${totalTransactions} Transaction${totalTransactions !== 1 ? 's' : ''}`;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Process transaction
+        function processTransaction(memberId, bookId, action, date) {
+            const member = members.find(m => m.id === memberId);
+            const book = books.find(b => b.id === bookId);
+
+            if (!member || !book) {
+                throw new Error('Invalid member or book selection');
+            }
+
+            if (action === 'issue' && !book.available) {
+                throw new Error('Book is not available for issuing');
+            }
+
+            if (action === 'return' && (book.available || book.issuedTo !== memberId)) {
+                throw new Error('Book is not issued to this member');
+            }
+
+            const transaction = {
+                id: nextTransactionId++,
+                memberId: memberId,
+                bookId: bookId,
+                action: action,
+                date: date,
+                timestamp: new Date().toISOString()
+            };
+
+            if (action === 'issue') {
+                book.available = false;
+                book.issuedTo = memberId;
+            } else if (action === 'return') {
+                book.available = true;
+                book.issuedTo = null;
+            }
+
+            transactions.push(transaction);
+            return transaction;
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            errorMessage.classList.remove('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show error message
+        function showErrorMessage(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            successMessage.classList.remove('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // Event listeners
+        actionSelect.addEventListener('change', function() {
+            populateBooks();
+            updateSubmitButton();
+        });
+
+        memberSelect.addEventListener('change', function() {
+            if (actionSelect.value === 'return') {
+                populateBooks();
+            }
+        });
+
+        // Form validation
+        [memberSelect, bookSelect, actionSelect, dateInput].forEach(element => {
+            element.addEventListener('change', function() {
+                if (this.value) {
+                    this.classList.add('valid');
+                } else {
+                    this.classList.remove('valid');
+                }
+            });
+        });
+
+        // Form submission
+        transactionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const memberId = parseInt(memberSelect.value);
+            const bookId = parseInt(bookSelect.value);
+            const action = actionSelect.value;
+            const date = dateInput.value;
+
+            // Validation
+            if (!memberId || !bookId || !action || !date) {
+                showErrorMessage('Please fill in all required fields.');
+                return;
+            }
+
+            try {
+                const transaction = processTransaction(memberId, bookId, action, date);
+                const member = members.find(m => m.id === memberId);
+                const book = books.find(b => b.id === bookId);
+                
+                // Success feedback
+                const actionText = action === 'issue' ? 'issued' : 'returned';
+                showSuccessMessage(`Book "${book.title}" ${actionText} to/from ${member.name} successfully!`);
+                
+                // Reset form
+                transactionForm.reset();
+                setTodayAsDefault();
+                memberSelect.classList.remove('valid');
+                bookSelect.classList.remove('valid');
+                actionSelect.classList.remove('valid');
+                dateInput.classList.remove('valid');
+                
+                // Update UI
+                populateBooks();
+                renderTransactions();
+                updateSubmitButton();
+                displayBooks(); // Update book display to show status changes
+                
+            } catch (error) {
+                showErrorMessage(error.message);
+            }
+        });
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+class Config:
+    SECRET_KEY = 'ray0l-library-key'
+    DATABASE = 'instance/lms.db'
